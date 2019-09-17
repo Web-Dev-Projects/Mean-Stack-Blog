@@ -1,0 +1,18 @@
+<nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+        <a class="navbar-brand" routerLink="/home">Blog</a>
+        <button class="navbar-toggler navbar-toggler-right" type="button" (click)="toCollapse=!toCollapse"
+            aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarResponsive" [class.collapse]="toCollapse">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item" routerLinkActive="active current">
+                    <a class="nav-link" routerLink="/home">Home<span class="sr-only">(current)</span></a></li>
+                <li class="nav-item" routerLinkActive="active current">
+                    <a class="nav-link" style="cursor: pointer" (click)="navigateToCreate()">Create</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
