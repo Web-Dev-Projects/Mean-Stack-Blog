@@ -1,0 +1,23 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "../.git"
+  },
+  "author": "shehab",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "formidable": "^1.2.1",
+    "fs": "0.0.1-security",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.7.1",
+    "path": "^0.12.7"
+  }
+}
