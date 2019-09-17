@@ -1,0 +1,30 @@
+<!-- Create Header -->
+<app-header [title]="'NASA BLOG'" [subtitle]="" [content]="'WELCOME TO NASA BLOG'" [imageUrl]="'home-bg.jpg'"
+    [headerClass]="'site-heading'">
+</app-header>
+
+<!-- Main Content -->
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+            <div *ngFor="let post of posts">
+                <div class="post-preview">
+                    <a (click)="viewPost(post._id)" style="cursor: pointer">
+                        <h2 class="post-title">
+                            {{post.title}}
+                        </h2>
+                        <h3 class="post-subtitle">
+                            {{post.subtitle}}
+                        </h3>
+                    </a>
+                    <p class="post-meta">Posted by {{post.owner}} on {{post.date.monthName}} {{post.date.day}},
+                        {{post.date.year}}</p>
+                    <i class="fa fa-eye icon"> {{post.viewsNum}}</i>
+                    <i class="fa fa-comment"> {{post.commentsNum}}</i>
+                </div>
+                <hr>
+            </div>
+
+        </div>
+    </div>
+</div>
