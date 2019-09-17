@@ -1,0 +1,18 @@
+<h1 mat-dialog-title>Enter username and password</h1>
+<div mat-dialog-content>
+    <form [formGroup]="form">
+        <mat-form-field>
+            <input matInput type="text" formControlName="username" required minlength="3" placeholder="username">
+            <mat-error *ngFor="let errMsg of getErrorsMsgs(username,'username')">{{errMsg}}</mat-error>
+        </mat-form-field>
+        <mat-form-field>
+            <input matInput type="password" formControlName="password" required minlength="4" placeholder="password">
+            <mat-error *ngFor="let errMsg of getErrorsMsgs(password,'password')">{{errMsg}} </mat-error>
+        </mat-form-field>
+        <mat-error *ngFor="let errMsg of getErrorsMsgs(form,'')">{{errMsg}} </mat-error>
+    </form>
+</div>
+<div mat-dialog-actions>
+    <button mat-button (click)="onNoClick()">No Thanks</button>
+    <button mat-button (click)="authenticate()">Authenticate</button>
+</div>

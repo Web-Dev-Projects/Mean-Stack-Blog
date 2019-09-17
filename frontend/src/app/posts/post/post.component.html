@@ -1,0 +1,19 @@
+<!-- Post Header -->
+<app-header [title]="post?.title" [subtitle]="post?.subtitle"
+    [content]="'Posted by ' + post?.owner + ' on ' + post?.date.monthName + ' ' + post?.date.day + ', ' + post?.date.year"
+    [imageUrl]="'post-bg.jpg'" [headerClass]="'post-heading'">
+</app-header>
+
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-md-10 mx-auto">
+                <p>{{post?.content}}</p>
+                <disqus [identifier]="pageId" (newComment)="onComment()"></disqus>
+            </div>
+        </div>
+    </div>
+</article>
+<hr>
