@@ -1,11 +1,22 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
+import { PostCreateComponent } from './posts/post-create/post-create.component';
+import { HomeComponent } from './home/home.component';
+import { ErrorComponent } from './error/error.component';
+import { AuthGaurd } from './common/guards/auth-gaurd';
+import { PostComponent } from './posts/post/post.component';
 
 
-const routes: Routes = [];
+const routes: Routes = [
+    { path: 'home', component: HomeComponent },
+    { path: '', redirectTo: '/home', pathMatch: "full" },
+    { path: 'posts/:id', component: PostComponent },
+    { path: 'create', component: PostCreateComponent, canActivate: [AuthGaurd] },
+    { path: '**', component: ErrorComponent },
+];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
+    imports: [RouterModule.forRoot(routes)],
+    exports: [RouterModule]
 })
 export class AppRoutingModule { }
