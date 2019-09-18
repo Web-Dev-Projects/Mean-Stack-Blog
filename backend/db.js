@@ -30,18 +30,6 @@ exports.incFieldsWithValues = (Model, id, fieldsToInc, values) => {
         { useFindAndModify: false });
 }
 
-exports.addElemToList = (Model, id, elem, listName, atBegin = false) => {
-    let agg;
-
-    if (atBegin) {
-        agg = { $push: { comments: { $each: [elem], $position: 0 } } };
-    } else {
-        agg = { $push: { comments: elem } };
-    }
-
-    return Model.findOneAndUpdate({ _id: id }, agg, { useFindAndModify: false });
-}
-
 exports.upsertElemToList = (Model, id, listName, newValue, listFilter) => {
     newValue = Object.assign(newValue, listFilter)
     let obj1 = {}
@@ -55,3 +43,9 @@ exports.upsertElemToList = (Model, id, listName, newValue, listFilter) => {
     return Promise.all([promise1, promise2]);
 }
 
+
+exports.addElemToList = (Model, id, listName, newValue) => {
+    let obj = {};
+    obj[listName] = newValue;
+    return Model.findOneAndUpdate({ _id: id }, { $push: obj }, { useFindAndModify: false });;
+}
