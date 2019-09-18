@@ -5,28 +5,29 @@ import { HttpClient } from '@angular/common/http';
 export class DataService {
     constructor(private http: HttpClient, private baseUrl: string) { }
 
-    getAll(urlExt: string = '') {
-        return this.http.get(this.baseUrl + urlExt);
+    getAll(urlExt: string = '', headers?) {
+
+        return this.http.get(this.baseUrl + urlExt, { headers: headers });
     }
 
-    get(id, urlExt: string = '', options?) {
-        return this.http.get(this.baseUrl + urlExt + id + '/', options);
+    get(id, urlExt: string = '', headers?) {
+        return this.http.get(this.baseUrl + urlExt + id + '/', { headers: headers });
     }
 
-    getWithReqBody(id, urlExt: string = '', reqBoy) {
-        return this.http.post(this.baseUrl + urlExt + id + '/', reqBoy);
+    getWithReqBody(id, urlExt: string = '', reqBoy, headers?) {
+        return this.http.post(this.baseUrl + urlExt + id + '/', reqBoy, { headers: headers });
     }
 
-    create(resource, urlExt: string = '') {
-        return this.http.post(this.baseUrl + urlExt, resource);
+    create(resource, urlExt: string = '', headers?) {
+        return this.http.post(this.baseUrl + urlExt, resource, { headers: headers });
     }
 
-    update(id, data, urlExt: string = '') {
-        return this.http.put(this.baseUrl + urlExt + id + '/', data, { headers: { 'Content-Type': 'application/json' } });
+    update(id, data, urlExt: string = '', headers = { 'Content-Type': 'application/json' }) {
+        return this.http.put(this.baseUrl + urlExt + id + '/', data, { headers: headers });
     }
 
-    delete(id, urlExt: string = '') {
-        return this.http.delete(this.baseUrl + urlExt + id + '/');
+    delete(id, urlExt: string = '', headers?) {
+        return this.http.delete(this.baseUrl + urlExt + id + '/', { headers: headers });
     }
 
 }

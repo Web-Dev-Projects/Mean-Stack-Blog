@@ -7,17 +7,22 @@ import { AngularFontAwesomeModule } from 'angular-font-awesome';
 import { DisqusModule } from 'ngx-disqus'
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule } from '@angular/common/http';
+import { ShareButtonsModule } from '@ngx-share/buttons';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { NgFlashMessagesModule } from 'ng-flash-messages';
 
 import { AppComponent } from './app.component';
 import { NavbarComponent } from 'src/app/navbar/navbar.component';
 import { PostCreateComponent } from './posts/post-create/post-create.component';
-import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { HeaderComponent } from './header/header.component';
 import { HomeComponent } from './home/home.component';
 import { FooterComponent } from './footer/footer.component';
-import { AuthenticateComponent } from './Authenticate/authenticate.component';
+import { AuthenticateComponent } from './authenticate/authenticate.component';
 import { ErrorComponent } from './error/error.component';
 import { PostComponent } from './posts/post/post.component';
+import { ReportComponent } from './posts/reports/report-create/report-create.component';
+import { ReportsListComponent } from './posts/reports/reports-list/reports-list.component';
+import { PostExetentionComponent } from './posts/post-exetention/post-exetention.component';
 
 @NgModule({
     declarations: [
@@ -31,6 +36,9 @@ import { PostComponent } from './posts/post/post.component';
         AuthenticateComponent,
         ErrorComponent,
         PostComponent,
+        ReportComponent,
+        ReportsListComponent,
+        PostExetentionComponent,
     ],
     imports: [
         BrowserModule,
@@ -41,11 +49,14 @@ import { PostComponent } from './posts/post/post.component';
         BrowserAnimationsModule,
         AngularFontAwesomeModule,
         HttpClientModule,
-        DisqusModule.forRoot('schneider-task-2')
+        ShareButtonsModule,
+        NgFlashMessagesModule.forRoot(),
+        DisqusModule.forRoot('schneider-task-2'),
     ],
     providers: [],
     entryComponents: [
-        AuthenticateComponent
+        AuthenticateComponent,
+        ReportComponent,
     ],
     bootstrap: [AppComponent]
 })

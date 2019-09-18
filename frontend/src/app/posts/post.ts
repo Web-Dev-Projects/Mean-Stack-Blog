@@ -6,4 +6,5 @@ export interface IPost {
     date: { dayName: string, month: number, year: number },
     viewsNum: number,
     commentsNum: number,
+    reports: [{ reporterName: String, reporterMail: String, reporterMsg: String, }],
 }

@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnChanges } from '@angular/core';
 import { IPost } from '../post';
 import { PostsService } from '../posts.service';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Observable, Subscriber, Subject } from 'rxjs';
 
 @Component({
     selector: 'app-post',
@@ -9,10 +10,12 @@ import { ActivatedRoute, Router } from '@angular/router';
     styleUrls: ['./post.component.css']
 })
 export class PostComponent implements OnInit {
+
     private postId;
 
     post: IPost = undefined;
     pageId = '/posts/';
+
 
     constructor(private postsService: PostsService, private activateRoute: ActivatedRoute) {
         this.postId = this.activateRoute.snapshot.params.id;
@@ -20,7 +23,6 @@ export class PostComponent implements OnInit {
     }
 
     ngOnInit() {
-        console.log(this.pageId)
         this.postsService.getPost(this.postId)
             .subscribe((post: IPost) => {
                 this.post = post;
@@ -30,6 +32,9 @@ export class PostComponent implements OnInit {
     onComment() {
         this.post.commentsNum++;
         this.postsService.commentOnPost(this.postId)
-            .subscribe();
+            .subscribe(() => {
+            }, () => {
+                this.post.commentsNum--;
+            });
     }
 }

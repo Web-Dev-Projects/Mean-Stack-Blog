@@ -1,4 +1,6 @@
 @import '~bootstrap/dist/css/bootstrap.min.css';
+@import '~@ngx-share/button/themes/default/default-theme';
+
 
  body {
     font-size: 20px;
@@ -26,6 +28,7 @@
   }
   
   a {
+    cursor: pointer;
     color: #212529;
     -webkit-transition: all 0.2s;
     transition: all 0.2s;
@@ -45,6 +48,7 @@
     font-weight: 700;
     margin-top: 60px;
   }
+
   
   .caption {
     font-size: 14px;
@@ -314,6 +318,7 @@
   }
   
   .floating-label-form-group {
+      width: 100%;
     font-size: 14px;
     position: relative;
     margin-bottom: 0;

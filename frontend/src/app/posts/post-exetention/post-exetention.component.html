@@ -1,0 +1,30 @@
+<div class="d-flex justify-content-between" *ngIf="post">
+    <div class="d-flex justify-content-start">
+        <i class="fa fa-eye icon"> {{post.viewsNum}}</i>
+        <i class="fa fa-comment icon"> {{post.commentsNum}}</i>
+        <i class="fa fa-exclamation-triangle" style="cursor: pointer" (click)="openReports()" title="show reports"
+            *ngIf="adminService.isSignedIn">
+            {{post.reports.length}}</i>
+    </div>
+
+    <div class="d-flex justify-content-end">
+        <i class="fa fa-share icon" style="cursor: pointer" (click)="toggleSharingOpts()">
+            <a data-toggle="tooltip" data-placement="right" title="Share">
+                Share</a></i>
+        <i class="fa fa-feed" style="cursor: pointer" (click)="report()">
+            <a data-toggle="tooltip" data-placement="right" title="Report">
+                Report</a></i>
+    </div>
+</div>
+
+<div id="sharing-options" *ngIf="canShowSharingOpts">
+    <hr>
+    <div class="d-flex justify-content-center">
+        <share-buttons [theme]="'modern-dark'" [include]="['facebook','twitter','whatsapp']" [show]="3"
+            [showText]="true" [url]="getUrl()" [autoSetMeta]="false">
+        </share-buttons>
+    </div>
+</div>
+
+<!-- <a href="http://localhost/posts/5d7fa45d4e500371378ccab1/#disqus_thread">Comments</a>
+<script id="dsq-count-scr" src="//schneider-task-2.disqus.com/count.js" async></script> -->

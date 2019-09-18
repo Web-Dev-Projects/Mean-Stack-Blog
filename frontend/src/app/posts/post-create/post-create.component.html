@@ -1,5 +1,6 @@
-<!-- Home Header -->
-<app-header [title]="'NASA BLOG'" [subtitle]="" [content]="'WELCOME TO NASA BLOG'" [imageUrl]="'home-bg.jpg'"
+<!-- Header -->
+<app-header [title]="'nasa blog' | uppercase" [subtitle]=""
+    [content]="'write your nice article about space' | uppercase" [imageUrl]="'create-bg.jpg'"
     [headerClass]="'site-heading'">
 </app-header>
 
@@ -8,7 +9,7 @@
 <div class="container">
     <div class="row">
         <div class="col-lg-8 col-md-10 mx-auto">
-            <form name="sentMessage" id="contactForm" (submit)="onSave()" [formGroup]="form" novalidate>
+            <form (submit)="onSave()" [formGroup]="form">
 
                 <div class="control-group">
                     <div class="form-group floating-label-form-group controls">

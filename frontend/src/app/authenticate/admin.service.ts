@@ -9,6 +9,7 @@ import { map } from 'rxjs/operators'
     providedIn: 'root'
 })
 export class AdminService extends DataService {
+
     constructor(http: HttpClient) { super(http, "http://localhost:5000/api/users/"); }
 
     signin(username: string, password: string) {

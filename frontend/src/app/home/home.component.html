@@ -1,15 +1,17 @@
 <!-- Create Header -->
-<app-header [title]="'NASA BLOG'" [subtitle]="" [content]="'WELCOME TO NASA BLOG'" [imageUrl]="'home-bg.jpg'"
-    [headerClass]="'site-heading'">
+<app-header [title]="'Nasa Blog' | uppercase" [subtitle]="" [content]="'welcome to nasa blog' | uppercase"
+    [imageUrl]="'home-bg.jpg'" [headerClass]="'site-heading'">
 </app-header>
+
 
 <!-- Main Content -->
 <div class="container">
     <div class="row">
         <div class="col-lg-8 col-md-10 mx-auto">
             <div *ngFor="let post of posts">
-                <div class="post-preview">
-                    <a (click)="viewPost(post._id)" style="cursor: pointer">
+
+                <div class="post-preview" *ngIf="adminService.isSignedIn || post.reports.length <= 5">
+                    <a (click)="viewPost(post._id)">
                         <h2 class="post-title">
                             {{post.title}}
                         </h2>
@@ -19,12 +21,11 @@
                     </a>
                     <p class="post-meta">Posted by {{post.owner}} on {{post.date.monthName}} {{post.date.day}},
                         {{post.date.year}}</p>
-                    <i class="fa fa-eye icon"> {{post.viewsNum}}</i>
-                    <i class="fa fa-comment"> {{post.commentsNum}}</i>
-                </div>
-                <hr>
-            </div>
 
+                    <app-post-exetention [post]="post"></app-post-exetention>
+                    <hr>
+                </div>
+            </div>
         </div>
     </div>
 </div>

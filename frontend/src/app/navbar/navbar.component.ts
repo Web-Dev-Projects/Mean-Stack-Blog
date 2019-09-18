@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog'
-import { AuthenticateComponent } from '../Authenticate/authenticate.component';
-import { AdminService } from '../Authenticate/admin.service';
+import { AuthenticateComponent } from '../authenticate/authenticate.component';
+import { AdminService } from '../authenticate/admin.service';
 import { Router } from '@angular/router';
 
 @Component({
@@ -12,12 +12,12 @@ import { Router } from '@angular/router';
 export class NavbarComponent {
 
     toCollapse = true;
-    constructor(private router: Router, private authDialog: MatDialog, private adminService: AdminService) {
+    constructor(private router: Router, private authDialog: MatDialog, public adminService: AdminService) {
     }
 
-    navigateToCreate() {
+    gainAdminAccess() {
         if (this.adminService.isSignedIn) {
-            this.router.navigate(['create']);
+            return;
         } else {
             this.authDialog.open(AuthenticateComponent, {
                 width: '400px',
@@ -25,8 +25,6 @@ export class NavbarComponent {
             });
         }
     }
-
-
 
 }
 

@@ -8,7 +8,7 @@ import { AppError } from '../common/errors/apperror';
 import { NotFoundError } from '../common/errors/notfound';
 import { BadInputError } from '../common/errors/badinput';
 import { catchError, map } from 'rxjs/operators';
-import { AdminService } from '../Authenticate/admin.service';
+import { AdminService } from '../authenticate/admin.service';
 
 @Injectable({
     providedIn: 'root'
@@ -31,9 +31,8 @@ export class PostsService extends DataService {
         };
 
         let post = { _id: undefined, date: currDate, title: title, subtitle: subtitle, content: content, owner: this.adminService.username }
-        let resource = Object.assign(post, { accessToken: localStorage.getItem('accessToken') });
 
-        return this.create(resource)
+        return this.create(post, '', { accessToken: localStorage.getItem('accessToken') })
             .pipe(catchError(this.errorHandler));
     }
 
@@ -85,37 +84,23 @@ export class PostsService extends DataService {
             .pipe(catchError(this.errorHandler));
     }
 
-    // getMyRating(postId) {
-    //     let reqBody = { accessToken: localStorage.get('accessToken') };
-    //     return this.getWithReqBody(postId, "userRating/", reqBody)
-    //         .pipe(catchError(this.errorHandler));
-    // }
+    reportPost(postId: string, reporterName: string, reporterMail: string, reporterMsg: string) {
+        let report = { reporterName, reporterMail, reporterMsg };
+        return this.update(postId, report, 'report/')
+            .pipe(catchError(this.errorHandler));
+    }
 
 
-
-
-    // addComment(postId, comment: IComment) {
-    //     return this.update(postId, comment, 'comments/')
-    //         .pipe(catchError(this.errorHandler));
-    // }
-
-
-
-
-    // private modifypostsData(posts) {
-    //     let baseUrl = "http://www.localhost:5000/";
-    //     const extractFileName = (path) => {
-    //         let dirs = (path as string).split('/');
-    //         let fileName = dirs[dirs.length - 1];
-    //         return fileName;
-    //     }
-
-    //     posts.forEach((post) => {
-    //         post.imgFileSrc = baseUrl + extractFileName(post.imgFileSrc);
-    //         post.exeFileSrc = extractFileName(post.exeFileSrc);
-    //     });
-
-    // }
+    getPostReports(postId) {
+        return new Observable(
+            (subscriber) => {
+                this.getPost(postId)
+                    .subscribe((post: IPost) => {
+                        subscriber.next(post.reports)
+                        subscriber.complete();
+                    })
+            }).pipe(catchError(this.errorHandler));
+    }
 
     private errorHandler(error) {
         console.log(error)

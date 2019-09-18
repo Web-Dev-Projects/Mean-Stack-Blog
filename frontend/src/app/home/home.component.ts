@@ -2,6 +2,8 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { IPost } from '../posts/post';
 import { PostsService } from '../posts/posts.service';
 import { Router } from '@angular/router';
+import { AdminService } from '../authenticate/admin.service';
+import { Subject } from 'rxjs';
 
 
 @Component({
@@ -10,11 +12,10 @@ import { Router } from '@angular/router';
     styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit {
-
     posts: IPost[] = [];
-    positionOptions = ["create", "share", "feedback"]
 
-    constructor(private postsService: PostsService, private router: Router) { }
+    constructor(private postsService: PostsService, private router: Router, private adminService: AdminService) { }
+
 
     ngOnInit() {
         this.postsService.getPosts()
@@ -23,10 +24,10 @@ export class HomeComponent implements OnInit {
             });
     };
 
-    viewPost(postId) {
+
+    viewPost(postId: string) {
         this.router.navigate(['posts', postId]);
         this.postsService.viewPost(postId).subscribe();
     }
-
 
 }

@@ -2,6 +2,7 @@ import { Component, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { FormGroup, FormControl } from '@angular/forms';
 import { AdminService } from './admin.service';
+import { NgFlashMessageService } from 'ng-flash-messages';
 import { Router } from '@angular/router';
 
 
@@ -11,7 +12,7 @@ import { Router } from '@angular/router';
     styleUrls: ['./authenticate.component.css']
 })
 export class AuthenticateComponent {
-
+    private triedToSumbit = false;
     form: FormGroup;
 
     constructor(
@@ -33,18 +34,22 @@ export class AuthenticateComponent {
     }
 
     authenticate() {
-        this.adminService.signin(this.username.value, this.password.value)
-            .subscribe(() => {
-                this.onNoClick();
-                this.router.navigate(['/create']);
-            }, (err) => {
-                this.form.setErrors({ 'unauthenticated': true });
-            });
+        this.triedToSumbit = true;
+
+        if (this.form.valid) {
+            this.adminService.signin(this.username.value, this.password.value)
+                .subscribe(() => {
+                    this.router.navigate(['/home'])
+                    this.onNoClick();
+                }, (err) => {
+                    this.form.setErrors({ 'unauthenticated': true });
+                });
+        }
 
     }
 
     getErrorsMsgs(field, fieldName: string) {
-        if (!(field.errors) || !(field.touched))
+        if (!(field.errors) || !(field.touched) || !(this.triedToSumbit))
             return [];
 
         let errors = field.errors;
