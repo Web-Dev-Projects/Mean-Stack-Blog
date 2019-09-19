@@ -1,21 +1,19 @@
-import { Component, Input, ChangeDetectionStrategy, OnInit, OnChanges, OnDestroy } from '@angular/core';
-import { IPost } from '../post';
+import { Component, Input } from '@angular/core';
+import { IPost, makePost } from '../post';
 import { MatDialog } from '@angular/material/dialog';
 import { ReportComponent } from 'src/app/posts/reports/report-create/report-create.component';
 import { AdminService } from 'src/app/authenticate/admin.service';
 import { PostsService } from '../posts.service';
 import { Router } from '@angular/router';
-import { Observable, Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-post-exetention',
     templateUrl: './post-exetention.component.html',
     styleUrls: ['./post-exetention.component.css'],
-    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PostExetentionComponent {
 
-    @Input('post') post: IPost;
+    @Input('post') post: IPost = makePost();
 
     private _canShowShareOpts = false;
 
@@ -44,9 +42,7 @@ export class PostExetentionComponent {
     }
 
     getUrl() {
-        let id = this.post ? this.post._id : '';
+        let id = this.post._id;
         return 'https://localhost.com/posts/' + id;
     }
-
-
 }

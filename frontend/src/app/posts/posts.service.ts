@@ -73,7 +73,6 @@ export class PostsService extends DataService {
         }
     }
 
-
     viewPost(postId) {
         return this.update(postId, {}, 'view/')
             .pipe(catchError(this.errorHandler));

@@ -3,7 +3,6 @@ import { IPost } from '../posts/post';
 import { PostsService } from '../posts/posts.service';
 import { Router } from '@angular/router';
 import { AdminService } from '../authenticate/admin.service';
-import { Subject } from 'rxjs';
 
 
 @Component({
@@ -16,14 +15,12 @@ export class HomeComponent implements OnInit {
 
     constructor(private postsService: PostsService, private router: Router, private adminService: AdminService) { }
 
-
     ngOnInit() {
         this.postsService.getPosts()
             .subscribe((posts: IPost[]) => {
                 this.posts = posts;
             });
     };
-
 
     viewPost(postId: string) {
         this.router.navigate(['posts', postId]);
