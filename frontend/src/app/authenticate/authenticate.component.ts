@@ -2,8 +2,8 @@ import { Component, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { FormGroup, FormControl } from '@angular/forms';
 import { AdminService } from './admin.service';
-import { NgFlashMessageService } from 'ng-flash-messages';
 import { Router } from '@angular/router';
+import { UnAuthError } from '../common/errors/unauth';
 
 
 @Component({
@@ -41,9 +41,7 @@ export class AuthenticateComponent {
                 .subscribe(() => {
                     this.router.navigate(['/home'])
                     this.onNoClick();
-                }, (err) => {
-                    this.form.setErrors({ 'unauthenticated': true });
-                });
+                }, this.errorHandler);
         }
 
     }
@@ -74,4 +72,12 @@ export class AuthenticateComponent {
 
         return errorsMsgs;
     }
+
+
+    private errorHandler = (error) => {
+        if (error instanceof UnAuthError) {
+            this.form.setErrors({ 'unauthenticated': true });
+        }
+    }
+
 }

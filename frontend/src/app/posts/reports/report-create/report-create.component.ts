@@ -2,6 +2,7 @@ import { Component, Inject } from '@angular/core';
 import { FormGroup, FormControl } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { PostsService } from '../../posts.service';
+import { Router } from '@angular/router';
 
 @Component({
     selector: 'app-report',
@@ -14,6 +15,7 @@ export class ReportComponent {
     private form: FormGroup;
 
     constructor(
+        private router: Router,
         private postsService: PostsService,
         public dialogRef: MatDialogRef<ReportComponent>,
         @Inject(MAT_DIALOG_DATA) public data: { targetPostId: string }) {
@@ -35,7 +37,6 @@ export class ReportComponent {
         if (this.form.valid) {
             this.postsService.reportPost(this.data.targetPostId, this.name.value, this.email.value, this.message.value)
                 .subscribe(() => {
-                    //TODO 
                     this.onNoClick();
                 }, this.errorHandler);
         }
@@ -69,6 +70,6 @@ export class ReportComponent {
     }
 
     private errorHandler(error) {
-        console.log(error)
+        this.router.navigate(['error'], { queryParams: { errCode: error.errorData.status } })
     }
 }

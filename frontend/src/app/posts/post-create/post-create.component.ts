@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 import { FormGroup, FormControl } from '@angular/forms';
 import { PostsService } from '../posts.service';
-import { IPost } from '../post';
 import { Router } from '@angular/router';
+import { UnAuthError } from 'src/app/common/errors/unauth';
 
 @Component({
     selector: 'app-post-create',
@@ -25,12 +25,10 @@ export class PostCreateComponent {
     get subtitle(): FormControl { return this.form.get('subtitle') as FormControl }
     get content(): FormControl { return this.form.get('content') as FormControl }
 
-
     onSave() {
         if (this.form.valid) {
             this.postsService.createPost(this.title.value, this.subtitle.value, this.content.value)
-                .subscribe((post: IPost) => {
-                    this.postsService.addPost(post);
+                .subscribe(() => {
                     this.router.navigate(['/home'])
                 }, this.errorHandler)
         }
@@ -59,8 +57,8 @@ export class PostCreateComponent {
         return errorsMsgs;
     }
 
-    private errorHandler(error) {
-        console.log(error)
+    private errorHandler = (error) => {
+        this.router.navigate(['error'], { queryParams: { errCode: error.getErrorData().status } })
     }
 
 }

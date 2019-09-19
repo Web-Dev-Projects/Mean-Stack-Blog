@@ -1,14 +1,14 @@
 import { Injectable } from '@angular/core';
-import { IPost } from './post';
+import { IPost, makePost } from './post';
 import { Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { throwError, Observable } from 'rxjs';
 import { DataService } from '../common/data.service';
 import { AppError } from '../common/errors/apperror';
 import { NotFoundError } from '../common/errors/notfound';
-import { BadInputError } from '../common/errors/badinput';
 import { catchError, map } from 'rxjs/operators';
 import { AdminService } from '../authenticate/admin.service';
+import { UnAuthError } from '../common/errors/unauth';
 
 @Injectable({
     providedIn: 'root'
@@ -16,7 +16,7 @@ import { AdminService } from '../authenticate/admin.service';
 export class PostsService extends DataService {
 
     private posts: IPost[] = [];
-    private selectedPost: IPost = null;
+    private selectedPost: IPost = makePost();
 
     constructor(http: HttpClient, private router: Router, private adminService: AdminService) {
         super(http, "http://localhost:5000/api/posts/");
@@ -30,14 +30,11 @@ export class PostsService extends DataService {
             year: curdt.getFullYear()
         };
 
-        let post = { _id: undefined, date: currDate, title: title, subtitle: subtitle, content: content, owner: this.adminService.username }
+        let post = { date: currDate, title: title, subtitle: subtitle, content: content, owner: this.adminService.username }
 
-        return this.create(post, '', { accessToken: localStorage.getItem('accessToken') })
+        return this.create(post, '', { accessToken: this.adminService.accessToken })
+            .pipe(map((post: IPost) => { this.posts.push(post); }))
             .pipe(catchError(this.errorHandler));
-    }
-
-    addPost(post: IPost) {
-        this.posts.push(post);
     }
 
     getPosts() {
@@ -102,9 +99,8 @@ export class PostsService extends DataService {
     }
 
     private errorHandler(error) {
-        console.log(error)
         if (error.status === 404) return throwError(new NotFoundError(error));
-        if (error.status === 400 || error.status === 401) return throwError(new BadInputError(error));
+        if (error.status === 401 || error.status === 402) return throwError(new UnAuthError(error));
         return throwError(new AppError(error));
     }
 

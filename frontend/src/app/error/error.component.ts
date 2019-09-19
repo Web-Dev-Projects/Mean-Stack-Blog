@@ -7,7 +7,7 @@ import { ActivatedRoute } from '@angular/router';
     styleUrls: ['./error.component.css']
 })
 export class ErrorComponent implements OnInit {
-    errCode: number;
+    errCode: string;
     errMsg: string;
 
     constructor(private activedRoute: ActivatedRoute) { }
@@ -15,11 +15,14 @@ export class ErrorComponent implements OnInit {
     ngOnInit() {
         this.errCode = this.activedRoute.snapshot.queryParams.errCode;
         switch (this.errCode) {
-            case 401:
+            case '401':
                 this.errMsg = "uauthenticated access!"
                 break;
+            case '500':
+                this.errMsg = "server is down!"
+                break;
             default: // no error code or 404
-                this.errCode = 404;
+                this.errCode = '404';
                 this.errMsg = "url notfound"
                 break;
         }
