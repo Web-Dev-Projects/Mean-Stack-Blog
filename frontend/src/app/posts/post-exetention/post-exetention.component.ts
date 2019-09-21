@@ -14,11 +14,9 @@ import { Router } from '@angular/router';
 export class PostExetentionComponent {
 
     @Input('post') post: IPost = makePost();
-
     private _canShowShareOpts = false;
 
     constructor(private reportDialog: MatDialog, private router: Router, public adminService: AdminService, private postsService: PostsService) { }
-
 
     get canShowSharingOpts() {
         return this._canShowShareOpts;
@@ -42,7 +40,6 @@ export class PostExetentionComponent {
     }
 
     getUrl() {
-        let id = this.post._id;
-        return 'https://localhost.com/posts/' + id;
+        return 'https://localhost.com/posts/' + this.post._id;
     }
 }

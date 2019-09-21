@@ -1,5 +1,5 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
+import { NgModule, ErrorHandler } from '@angular/core';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppMaterialModule } from './app.material.module';
@@ -23,6 +23,7 @@ import { PostComponent } from './posts/post/post.component';
 import { ReportComponent } from './posts/reports/report-create/report-create.component';
 import { ReportsListComponent } from './posts/reports/reports-list/reports-list.component';
 import { PostExetentionComponent } from './posts/post-exetention/post-exetention.component';
+import { GlobalErrorHandler } from './common/errors/global-error-handler';
 
 @NgModule({
     declarations: [
@@ -53,7 +54,9 @@ import { PostExetentionComponent } from './posts/post-exetention/post-exetention
         NgFlashMessagesModule.forRoot(),
         DisqusModule.forRoot('schneider-task-2'),
     ],
-    providers: [],
+    providers: [
+        { provide: ErrorHandler, useClass: GlobalErrorHandler }
+    ],
     entryComponents: [
         AuthenticateComponent,
         ReportComponent,

@@ -48,7 +48,7 @@ export class ReportComponent {
     }
 
     getErrorsMsgs(field, fieldName: string) {
-        if (!(field.errors) || !(field.touched) || !(this.triedToSumbit))
+        if (!(field.errors) || !(this.triedToSumbit))
             return [];
 
         let errors = field.errors;

@@ -1,8 +1,9 @@
-import { AppError } from './apperror';
+import { AppError } from './app-error';
 import { HttpErrorResponse } from '@angular/common/http';
 
-export class NotFoundError extends AppError {
+export class BadInputError extends AppError {
     constructor(err: HttpErrorResponse) {
         super(err)
     }
+
 }

@@ -24,7 +24,6 @@ export class HomeComponent implements OnInit {
 
     viewPost(postId: string) {
         this.router.navigate(['posts', postId]);
-        this.postsService.viewPost(postId).subscribe();
     }
 
 }

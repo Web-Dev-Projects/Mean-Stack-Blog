@@ -23,6 +23,11 @@ export class PostComponent implements OnInit {
         this.postsService.getPost(this.postId)
             .subscribe((post: IPost) => {
                 this.post = post;
+                this.post.viewsNum++;
+                this.postsService.viewPost(this.postId)
+                    .subscribe(null, () => {
+                        this.post.viewsNum--;
+                    })
             });
     }
 

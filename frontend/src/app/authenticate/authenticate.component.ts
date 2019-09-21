@@ -1,9 +1,10 @@
 import { Component, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { FormGroup, FormControl } from '@angular/forms';
+import { FormGroup, FormControl, AbstractControl } from '@angular/forms';
 import { AdminService } from './admin.service';
 import { Router } from '@angular/router';
 import { UnAuthError } from '../common/errors/unauth';
+import { AppError } from '../common/errors/app-error';
 
 
 @Component({
@@ -39,15 +40,20 @@ export class AuthenticateComponent {
         if (this.form.valid) {
             this.adminService.signin(this.username.value, this.password.value)
                 .subscribe(() => {
-                    this.router.navigate(['/home'])
                     this.onNoClick();
-                }, this.errorHandler);
+                    this.router.navigate(['/home'])
+                }, (error: AppError) => {
+                    if (error instanceof UnAuthError) {
+                        this.form.setErrors({ 'unauthenticated': true });
+                    } else {
+                        throw error;
+                    }
+                });
         }
-
     }
 
-    getErrorsMsgs(field, fieldName: string) {
-        if (!(field.errors) || !(field.touched) || !(this.triedToSumbit))
+    getErrorsMsgs(field: AbstractControl, fieldName: string) {
+        if (!(field.errors) || !(this.triedToSumbit))
             return [];
 
         let errors = field.errors;
@@ -73,11 +79,5 @@ export class AuthenticateComponent {
         return errorsMsgs;
     }
 
-
-    private errorHandler = (error) => {
-        if (error instanceof UnAuthError) {
-            this.form.setErrors({ 'unauthenticated': true });
-        }
-    }
 
 }

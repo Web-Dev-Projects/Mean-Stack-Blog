@@ -1,4 +1,4 @@
-import { AppError } from './apperror';
+import { AppError } from './app-error';
 import { HttpErrorResponse } from '@angular/common/http';
 
 export class UnAuthError extends AppError {

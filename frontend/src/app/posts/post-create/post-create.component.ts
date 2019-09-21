@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { FormGroup, FormControl } from '@angular/forms';
+import { FormGroup, FormControl, AbstractControl } from '@angular/forms';
 import { PostsService } from '../posts.service';
 import { Router } from '@angular/router';
 import { UnAuthError } from 'src/app/common/errors/unauth';
@@ -30,12 +30,14 @@ export class PostCreateComponent {
             this.postsService.createPost(this.title.value, this.subtitle.value, this.content.value)
                 .subscribe(() => {
                     this.router.navigate(['/home'])
-                }, this.errorHandler)
+                }, (error) => {
+                    this.router.navigate(['error'], { queryParams: { errCode: error.getErrorData().status } })
+                })
         }
     }
 
 
-    getErrorsMsgs(field, fieldName: string) {
+    getErrorsMsgs(field: AbstractControl, fieldName: string) {
         if (!(field.errors) || !(field.touched))
             return [];
 
@@ -56,9 +58,4 @@ export class PostCreateComponent {
 
         return errorsMsgs;
     }
-
-    private errorHandler = (error) => {
-        this.router.navigate(['error'], { queryParams: { errCode: error.getErrorData().status } })
-    }
-
 }

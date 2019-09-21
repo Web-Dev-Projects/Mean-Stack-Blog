@@ -16,13 +16,17 @@ export class NavbarComponent {
     }
 
     gainAdminAccess() {
-        if (this.adminService.isSignedIn) {
-            return;
-        } else {
+        if (!(this.adminService.isSignedIn)) {
             this.authDialog.open(AuthenticateComponent, {
                 width: '400px',
                 data: { username: '', password: '' }
             });
+        }
+    }
+
+    loseAdminAccess() {
+        if (this.adminService.isSignedIn) {
+            this.adminService.signout();
         }
     }
 
