@@ -6,7 +6,6 @@ import { Router } from '@angular/router';
 import { UnAuthError } from '../common/errors/unauth';
 import { AppError } from '../common/errors/app-error';
 
-
 @Component({
     selector: 'app-Authenticate',
     templateUrl: './authenticate.component.html',
@@ -41,7 +40,8 @@ export class AuthenticateComponent {
             this.adminService.signin(this.username.value, this.password.value)
                 .subscribe(() => {
                     this.onNoClick();
-                    this.router.navigate(['/home'])
+                    // this.toastrService.success("Successfully logged in as admin");
+                    this.router.navigate(['/home']);
                 }, (error: AppError) => {
                     if (error instanceof UnAuthError) {
                         this.form.setErrors({ 'unauthenticated': true });

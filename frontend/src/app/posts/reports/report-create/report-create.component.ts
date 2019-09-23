@@ -3,6 +3,8 @@ import { FormGroup, FormControl } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { PostsService } from '../../posts.service';
 import { Router } from '@angular/router';
+import { IPost } from '../../post';
+import { IReport } from '../report';
 
 @Component({
     selector: 'app-report',
@@ -18,7 +20,7 @@ export class ReportComponent {
         private router: Router,
         private postsService: PostsService,
         public dialogRef: MatDialogRef<ReportComponent>,
-        @Inject(MAT_DIALOG_DATA) public data: { targetPostId: string }) {
+        @Inject(MAT_DIALOG_DATA) public data: { targetPost: IPost }) {
 
         this.form = new FormGroup({
             name: new FormControl(''),
@@ -35,10 +37,21 @@ export class ReportComponent {
         this.triedToSumbit = true;
 
         if (this.form.valid) {
-            this.postsService.reportPost(this.data.targetPostId, this.name.value, this.email.value, this.message.value)
+            let report: IReport = {
+                reporterName: this.name.value,
+                reporterMail: this.email.value,
+                reporterMsg: this.message.value
+            };
+
+            this.data.targetPost.reports.push(report);
+            this.postsService.reportPost(this.data.targetPost, report)
                 .subscribe(() => {
                     this.onNoClick();
-                }, this.errorHandler);
+                }, (error) => {
+                    let indx = this.data.targetPost.reports.indexOf(report);
+                    this.data.targetPost.reports.splice(indx, 1);
+                    this.errorHandler(error);
+                });
         }
     }
 

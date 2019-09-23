@@ -69,8 +69,8 @@ postsRouter.put('/comment/:id', (req, res) => {
 
 postsRouter.put('/report/:id', (req, res) => {
     db.addElemToList(PostModel, req.params.id, "reports", req.body)
-        .then(() => {
-            res.status(200).json({ msg: "report on post added successfully" });
+        .then((post) => {
+            res.status(200).json(post);
         })
         .catch((err => {
             console.log("in adding new report ", err);

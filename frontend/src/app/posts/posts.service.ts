@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { DataService } from '../common/data.service';
 import { map } from 'rxjs/operators';
 import { AdminService } from '../authenticate/admin.service';
+import { IReport } from './reports/report';
 
 @Injectable({
     providedIn: 'root'
@@ -23,7 +24,7 @@ export class PostsService extends DataService {
         let currDate = {
             monthName: curdt.toLocaleString('default', { month: 'long' }),
             day: curdt.getDate(),
-            year: curdt.getFullYear()
+            year: curdt.getFullYear(),
         };
 
         let post = { date: currDate, title: title, subtitle: subtitle, content: content, owner: this.adminService.username }
@@ -73,11 +74,9 @@ export class PostsService extends DataService {
         return this.update(postId, {}, 'comment/');
     }
 
-    reportPost(postId: string, reporterName: string, reporterMail: string, reporterMsg: string) {
-        let report = { reporterName, reporterMail, reporterMsg };
-        return this.update(postId, report, 'report/');
-    }
-
+    reportPost(post: IPost, report: IReport) {
+        return this.update(post._id, report, 'report/');
+    };
 
     getPostReports(postId) {
         return new Observable(

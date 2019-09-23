@@ -35,7 +35,7 @@ export class PostExetentionComponent {
     report() {
         this.reportDialog.open(ReportComponent, {
             width: '600px',
-            data: { targetPostId: this.post._id }
+            data: { targetPost: this.post }
         });
     }
 
