@@ -14,7 +14,7 @@ export class PostComponent implements OnInit {
     post: IPost = makePost();
     pageId = '/posts/';
 
-    constructor(private postsService: PostsService, private activateRoute: ActivatedRoute) {
+    constructor(private postsService: PostsService, private activateRoute: ActivatedRoute, private router: Router) {
         this.postId = this.activateRoute.snapshot.params.id;
         this.pageId += this.postId;
     }
@@ -25,9 +25,13 @@ export class PostComponent implements OnInit {
                 this.post = post;
                 this.post.viewsNum++;
                 this.postsService.viewPost(this.postId)
-                    .subscribe(null, () => {
+                    .subscribe(null, (error) => {
+                        this.post = makePost();
                         this.post.viewsNum--;
+                        this.router.navigate(['error'], { queryParams: { errCode: error.getErrorData().status } });
                     })
+            }, (error) => {
+                this.router.navigate(['error'], { queryParams: { errCode: error.getErrorData().status } });
             });
     }
 

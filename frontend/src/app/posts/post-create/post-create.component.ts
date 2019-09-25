@@ -2,7 +2,6 @@ import { Component } from '@angular/core';
 import { FormGroup, FormControl, AbstractControl } from '@angular/forms';
 import { PostsService } from '../posts.service';
 import { Router } from '@angular/router';
-import { UnAuthError } from 'src/app/common/errors/unauth';
 
 @Component({
     selector: 'app-post-create',
@@ -12,12 +11,14 @@ import { UnAuthError } from 'src/app/common/errors/unauth';
 export class PostCreateComponent {
 
     private form: FormGroup;
+    private triedToSumbit = false;
+    contentFile: File = null;
 
     constructor(public postsService: PostsService, private router: Router) {
         this.form = new FormGroup({
             title: new FormControl(''),
             subtitle: new FormControl(''),
-            content: new FormControl(''),
+            content: new FormControl('', [this.makeFileValidator("md")])
         });
     }
 
@@ -26,8 +27,10 @@ export class PostCreateComponent {
     get content(): FormControl { return this.form.get('content') as FormControl }
 
     onSave() {
+        this.triedToSumbit = true;
+
         if (this.form.valid) {
-            this.postsService.createPost(this.title.value, this.subtitle.value, this.content.value)
+            this.postsService.createPost(this.title.value, this.subtitle.value, this.contentFile)
                 .subscribe(() => {
                     this.router.navigate(['/home'])
                 }, (error) => {
@@ -38,7 +41,7 @@ export class PostCreateComponent {
 
 
     getErrorsMsgs(field: AbstractControl, fieldName: string) {
-        if (!(field.errors) || !(field.touched))
+        if (!(field.errors) || !(this.triedToSumbit))
             return [];
 
         let errors = field.errors;
@@ -53,9 +56,28 @@ export class PostCreateComponent {
                     case "required":
                         errorsMsgs.push(fieldName + " is required.");
                         break;
+                    case "wrongExetention":
+                        errorsMsgs.push(`${fieldName} should have ${errors[errName].requiredExetention} exetetion`)
+                        break;
                 }
             })
 
         return errorsMsgs;
+    }
+
+
+    private makeFileValidator(exetention) {
+        return function (control: AbstractControl) {
+            if (!(control.value)) return { required: { required: true } };
+            else if (control.value instanceof Array && control.value.length > 1) return { wrongFilesNum: { requiredFilesNum: 1 } }
+
+            let fielExt = control.value.split(".").reverse()[0];
+
+            if (fielExt !== exetention) {
+                return { wrongExetention: { requiredExetention: exetention } };
+            } else {
+                return null;
+            }
+        }
     }
 }

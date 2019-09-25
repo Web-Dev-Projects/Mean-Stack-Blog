@@ -6,10 +6,11 @@ import { AppMaterialModule } from './app.material.module';
 import { AngularFontAwesomeModule } from 'angular-font-awesome';
 import { DisqusModule } from 'ngx-disqus'
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { ShareButtonsModule } from '@ngx-share/buttons';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { NgFlashMessagesModule } from 'ng-flash-messages';
+import { MarkdownModule } from 'ngx-markdown';
 
 import { AppComponent } from './app.component';
 import { NavbarComponent } from 'src/app/navbar/navbar.component';
@@ -53,6 +54,7 @@ import { GlobalErrorHandler } from './common/errors/global-error-handler';
         ShareButtonsModule,
         NgFlashMessagesModule.forRoot(),
         DisqusModule.forRoot('schneider-task-2'),
+        MarkdownModule.forRoot({ loader: HttpClient }),
     ],
     providers: [
         { provide: ErrorHandler, useClass: GlobalErrorHandler }

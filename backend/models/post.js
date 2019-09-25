@@ -4,9 +4,9 @@ module.exports = mongoose.model('Posts',
     new mongoose.Schema({
         title: String,
         subtitle: String,
-        content: String,
+        contentFileSrc: String,
         owner: String,
-        date: { day: Number, monthName: String, year: Number },
+        date: { day: String, monthName: String, year: String },
         viewsNum: { type: Number, default: 0 },
         commentsNum: { type: Number, default: 0 },
         reports: {

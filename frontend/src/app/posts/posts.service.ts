@@ -19,19 +19,31 @@ export class PostsService extends DataService {
         super(http, "http://localhost:5000/api/posts/");
     }
 
-    createPost(title: string, subtitle: string, content: string) {
+    createPost(title: string, subtitle: string, contentFile: File) {
         let curdt = new Date();
         let currDate = {
             monthName: curdt.toLocaleString('default', { month: 'long' }),
-            day: curdt.getDate(),
-            year: curdt.getFullYear(),
+            day: curdt.getDate().toString(),
+            year: curdt.getFullYear().toString(),
         };
 
-        let post = { date: currDate, title: title, subtitle: subtitle, content: content, owner: this.adminService.username }
+        let newPostData: FormData = new FormData();
 
-        return this.create(post, '', { accessToken: this.adminService.accessToken })
-            .pipe(map((post: IPost) => { this.posts.push(post); }));
+        newPostData.append('owner', this.adminService.username);
+        newPostData.append('title', title);
+        newPostData.append('subtitle', subtitle);
+        newPostData.append('contentFile', contentFile);
+        newPostData.append('monthName', currDate.monthName);
+        newPostData.append('day', currDate.day);
+        newPostData.append('year', currDate.year);
+
+        return this.create(newPostData, '', { accessToken: this.adminService.accessToken })
+            .pipe(map((post: IPost) => {
+                this.modifyPostsContentFileSrc([post])
+                this.posts.push(post);
+            }));
     }
+
 
     getPosts() {
         return new Observable(
@@ -39,8 +51,9 @@ export class PostsService extends DataService {
                 subscriber.next(this.posts)
                 this.getAll().subscribe(
                     (posts: IPost[]) => {
+                        this.modifyPostsContentFileSrc(posts);
                         this.posts = posts;
-                        subscriber.next(this.posts);
+                        subscriber.next([...posts]);
                         subscriber.complete();
                     });
             });
@@ -49,19 +62,21 @@ export class PostsService extends DataService {
     getPost(postId) {
         if (this.posts.length) {
             let posts = this.posts.filter(post => post._id === postId);
-            this.selectedPost = posts ? posts[0] : null;
+            if (posts.length)
+                this.selectedPost = posts[0];
         }
 
         if (this.selectedPost._id === postId) {
             return new Observable((subscriber) => {
-                subscriber.next(this.selectedPost)
+                subscriber.next(Object.assign({}, this.selectedPost));
                 subscriber.complete();
             })
         } else {
             return this.get(postId)
                 .pipe(map((post: IPost) => {
+                    this.modifyPostsContentFileSrc([post])
                     this.selectedPost = post;
-                    return this.selectedPost;
+                    return Object.assign({}, this.selectedPost);
                 }));
         }
     }
@@ -83,10 +98,17 @@ export class PostsService extends DataService {
             (subscriber) => {
                 this.getPost(postId).subscribe(
                     (post: IPost) => {
-                        subscriber.next(post.reports)
+                        subscriber.next([...post.reports])
                         subscriber.complete();
                     })
             });
+    }
+
+
+    private modifyPostsContentFileSrc(posts: IPost[]) {
+        posts.forEach((post) => {
+            post.contentFileSrc = this.baseUrl + post.contentFileSrc;
+        });
     }
 
 }

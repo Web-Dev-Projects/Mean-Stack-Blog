@@ -29,22 +29,30 @@
                     </div>
                 </div>
 
-                <div class="control-group">
-                    <div class="form-group floating-label-form-group controls">
-                        <label>Content</label>
-                        <textarea rows="5" class="form-control" formControlName="content" placeholder="Content"
-                            id="message" required minlength="5"></textarea>
+
+                <br>
+                <div class="control-group custom-file">
+                    <div class="form-group controls">
+                        <label class="custom-file-label"
+                            for="contentFileName">{{contentFile? contentFile.name:'Choose content file with .md exetention'}}</label>
+                        <input formControlName="content" type="file" class="custom-file-input"
+                            enctype="multipart/form-data" id="contentFileName"
+                            (change)="contentFile=$event.target.files[0]">
                     </div>
-                    <p class="help-block text-danger" *ngFor="let errMsg of getErrorsMsgs(content,'post content')">
+                    <p class="help-block text-danger" *ngFor="let errMsg of getErrorsMsgs(content,'content file')">
                         {{errMsg}}</p>
                 </div>
-                <br>
 
+                <br>
+                <br>
                 <div id="success"></div>
                 <div class="form-group">
-                    <button type="submit" class="btn btn-primary" [disabled]="!form.valid">Post</button>
+                    <button type="submit" class="btn btn-primary">Post</button>
                 </div>
+
             </form>
+
+
         </div>
     </div>
 </div>

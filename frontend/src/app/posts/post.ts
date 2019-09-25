@@ -1,9 +1,9 @@
 export interface IPost {
     _id: string,
     title: string,
-    content: string,
+    contentFileSrc: string,
     owner: string,
-    date: { dayName: string, month: number, year: number },
+    date: { dayName: string, month: string, year: string },
     viewsNum: number,
     commentsNum: number,
     reports: { reporterName: string, reporterMail: string, reporterMsg: string, }[],
@@ -13,9 +13,9 @@ export function makePost() {
     return Object.assign({}, {
         _id: '',
         title: '',
-        content: '',
+        contentFileSrc: '',
         owner: '',
-        date: { dayName: '', month: 0, year: 0 },
+        date: { dayName: '', month: '', year: '' },
         viewsNum: 0,
         commentsNum: 0,
         reports: [],
