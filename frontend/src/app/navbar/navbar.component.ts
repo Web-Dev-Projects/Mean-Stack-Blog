@@ -27,6 +27,7 @@ export class NavbarComponent {
     loseAdminAccess() {
         if (this.adminService.isSignedIn) {
             this.adminService.signout();
+            this.router.navigate(['/'])
         }
     }
 

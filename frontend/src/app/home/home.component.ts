@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { IPost } from '../posts/post';
 import { PostsService } from '../posts/posts.service';
 import { Router } from '@angular/router';
