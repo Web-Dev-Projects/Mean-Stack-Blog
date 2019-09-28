@@ -14,13 +14,22 @@ module.exports = function (req, res, next) {
         let newFileName = uniqueHash + '_' + files[fileName].name;
 
         fields.contentFileSrc = newFileName;
-
         let newpath = path.join(process.env.FILESPATH, newFileName);
-        fs.rename(oldpath, newpath, function (err) {
+
+        fs.readFile(oldpath, 'utf8', (err, data) => {
             if (err) {
-                console.log("in filesaver", err);
-                return res.status(500).json(err)
+                console.log("in filesaver (reading)", err);
+                return res.status(500).json({ err: "err in saving file" });
             }
+
+            console.log(data.split("\n"));
+            fs.rename(oldpath, newpath, function (err) {
+                if (err) {
+                    console.log("in filesaver (moving)", err);
+                    return res.status(500).json(err)
+                }
+            });
+
         });
     });
 

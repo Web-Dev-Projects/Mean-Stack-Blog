@@ -6,6 +6,7 @@ export interface IPost {
     date: { dayName: string, month: string, year: string },
     viewsNum: number,
     commentsNum: number,
+    likers: string[],
     reports: { reporterName: string, reporterMail: string, reporterMsg: string, }[],
 }
 
@@ -18,6 +19,7 @@ export function makePost() {
         date: { dayName: '', month: '', year: '' },
         viewsNum: 0,
         commentsNum: 0,
+        likers: [],
         reports: [],
     });
 }

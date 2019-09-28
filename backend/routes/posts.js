@@ -1,15 +1,15 @@
 const PostModel = require('../models/post')
 const authenticate = require('../middlewares/authenticate');
 const express = require('express')
-const db = require('../db')
 const formParser = require('../middlewares/form-parser')
 const fileSaver = require('../middlewares/file-saver')
-
+const tokenDecoder = require('../middlewares/access-token-decode')
+const db = require('../db')
+const path = require('path')
+const fs = require('fs')
 const postsRouter = express.Router();
 
-postsRouter.use('', express.static('contentFiles'));
-
-postsRouter.post('', [authenticate, formParser, fileSaver],
+postsRouter.post('', [tokenDecoder, authenticate, formParser, fileSaver],
     (req, res) => {
         db.create(PostModel, req.body)
             .then((data) => {
@@ -23,9 +23,19 @@ postsRouter.post('', [authenticate, formParser, fileSaver],
 );
 
 postsRouter.get('', (req, res) => {
+
     db.find(PostModel, {})
         .then(data => {
-            res.status(200).json(data);
+            data = data.map((doc => {
+                doc = doc.toObject();
+
+                doc.viewsNum = doc.postUsers.viewers.length;
+                doc.likers = doc.postUsers.likers;
+                delete doc.postUsers;
+                return doc;
+            }))
+
+            res.status(200).json({ sid: req.headers.sid, data: data });
         })
         .catch((err) => {
             console.log("in getting posts", err);
@@ -36,8 +46,12 @@ postsRouter.get('', (req, res) => {
 postsRouter.get('/:id', (req, res) => {
     db.findOne(PostModel, { _id: req.params.id })
         .then(data => {
+            data = data.toObject();
             if (data) {
-                res.status(200).json(data)
+                data.viewsNum = data.postUsers.viewers.length;
+                data.likers = data.postUsers.likers;
+                delete data.postUsers;
+                res.status(200).json({ sid: req.headers.sid, data: data })
             } else {
                 res.status(404).json({ msg: "user id is wrong or invalid" });
             }
@@ -50,21 +64,42 @@ postsRouter.get('/:id', (req, res) => {
 
 
 postsRouter.put('/view/:id', (req, res) => {
-    db.incFieldsWithValues(PostModel, req.params.id, ["viewsNum"], [1])
-        .then(() => {
-            res.status(200).json({ msg: "num of views increased by 1" });
+    PostModel.findOneAndUpdate({ _id: req.params.id }, { $addToSet: { "postUsers.viewers": req.headers.sid } }, { useFindAndModify: false, new: true })
+        .then((data) => {
+            res.status(200).json({ sid: req.headers.sid, data: data.postUsers.viewers.length });
         })
         .catch((err => {
             console.log("increase views num", err);
             res.status(500).json({ errMsg: "fail in increasing views num" });
         }))
+});
 
+postsRouter.put('/like/:id', (req, res) => {
+    if (req.body.like === true) {
+        PostModel.findOneAndUpdate({ _id: req.params.id }, { $addToSet: { "postUsers.likers": req.headers.sid } }, { useFindAndModify: false, new: true })
+            .then((data) => {
+                res.status(200).json({ sid: req.headers.sid, data: data.postUsers.likers });
+            })
+            .catch((err => {
+                console.log("in likers", err);
+                res.status(500).json({ errMsg: "fail in changing likers" });
+            }))
+    } else {
+        PostModel.findOneAndUpdate({ _id: req.params.id }, { $pull: { "postUsers.likers": req.headers.sid } }, { useFindAndModify: false, new: true })
+            .then((data) => {
+                res.status(200).json({ sid: req.headers.sid, data: data.postUsers.likers });
+            })
+            .catch((err => {
+                console.log("in likers", err);
+                res.status(500).json({ errMsg: "fail in changing likers" });
+            }))
+    }
 });
 
 postsRouter.put('/comment/:id', (req, res) => {
     db.incFieldsWithValues(PostModel, req.params.id, ["commentsNum"], [1])
         .then(() => {
-            res.status(200).json({ msg: "num of comments increased by 1" });
+            res.status(200).json({ sid: req.headers.sid, data: {} });
         })
         .catch((err => {
             console.log("increase comments num", err);
@@ -77,7 +112,7 @@ postsRouter.put('/comment/:id', (req, res) => {
 postsRouter.put('/report/:id', (req, res) => {
     db.addElemToList(PostModel, req.params.id, "reports", req.body)
         .then((post) => {
-            res.status(200).json(post);
+            res.status(200).json({ sid: req.headers.sid, data: post });
         })
         .catch((err => {
             console.log("in adding new report ", err);
@@ -86,13 +121,97 @@ postsRouter.put('/report/:id', (req, res) => {
 
 });
 
-postsRouter.get('/download/:id', (req, res) => {
+postsRouter.put('/content/:id', [tokenDecoder], (req, res) => {
+    if (req.headers.decodedtoken) {
+        res.status(500).json({ msg: "Admin is not allowd" });
+    } else {
+        PostModel.updateOne(
+            { _id: req.params.id, "contentComments.contentSegment": { $ne: req.body.contentSegment } },
+            { $push: { contentComments: { contentSegment: req.body.contentSegment, comments: [] } } }
+        ).then(() => {
+            PostModel.updateOne({ _id: req.params.id, "contentComments.contentSegment": req.body.contentSegment },
+                { $push: { "contentComments.$.comments": { name: req.body.name, text: req.body.comment } } })
+                .then(() => {
+                    res.status(200).json({ msg: "comment sent sucessfyly" });
+                })
+                .catch(err => {
+                    console.log("in commenting on post content ", err);
+                    res.status(500).json(err);
+                });
+        }).catch(err => {
+            console.log("in commenting on post content ", err);
+            res.status(404).json(err);
+        });
+    }
+})
+
+postsRouter.get('/content/:id', [tokenDecoder], (req, res) => {
+
     db.findOne(PostModel, { '_id': req.params.id })
         .then(data => {
-            let fileLocation = path.join(process.env.FILESPATH, data.contentFileName);
-            res.status(200).download(fileLocation, data.contentFileName);
+            let filePath = path.join(process.env.FILESPATH, data.contentFileSrc);
+
+            if (req.headers.decodedtoken) {
+                PostModel.findOne({ '_id': req.params.id }, { contentComments: 1, "contentComments.comments": 1, "contentComments.contentSegment": 1 })
+                    .then((data) => {
+                        let text = insertElemnts(fs.readFileSync(filePath, 'utf8'), data.contentComments);
+                        res.status(200).json({ content: text });
+                    })
+                    .catch((err) => {
+                        console.log(err)
+                    })
+            }
+            else {
+                let text = insertElemnts(fs.readFileSync(filePath, 'utf8'));
+                res.status(200).json({ content: text });
+            }
         })
-        .catch(err => res.status(404).json(err));
+        .catch(err => {
+            console.log("in getting post content ", err);
+            res.status(404).json(err);
+        });
 });
+
+
+
+function insertElemnts(fileText, contentComments = null) {
+
+    newFileData = '';
+    count = 1;
+    openCode = false;
+    let contentCommentsI = 0;
+    if (contentComments)
+        contentComments = contentComments.sort((c1, c2) => parseInt(c1.contentSegment, 10) > parseInt(c2.contentSegment, 10));
+
+    fileText.split("\n").forEach((text) => {
+        if (text.includes('```')) {
+            newFileData += text + '\n';
+            openCode = !openCode;
+        } else if (text == '') {
+            newFileData += '\n';
+        } else if (!openCode) {
+            let title = (contentComments) ? "'Show comments'" : "'Add your comment'";
+            let icon = (contentComments) ? "fa fa-comments" : "fa fa-edit";
+            let button = ` <i title=${title} style="cursor: pointer" class="${icon} contentComments" id=${count++}></i>\n`;
+
+            newFileData += text + ((contentComments) ? '' : button);
+            if (contentComments && contentCommentsI < contentComments.length && contentComments[contentCommentsI].contentSegment === (count - 1).toString()) {
+                newFileData += button + `<ul id=${count - 1} name='contentComments' hidden>`;
+                contentComments[contentCommentsI]['comments']
+                    .forEach((comment) => {
+                        newFileData += `<li>name: ${comment.name}    comment: ${comment.text}</li>`;
+                    })
+                contentCommentsI++;
+                newFileData += "</ul>\n";
+            } else {
+                newFileData += '\n';
+            }
+        } else {
+            newFileData += text + '\n';
+        }
+    })
+
+    return newFileData;
+}
 
 module.exports = postsRouter

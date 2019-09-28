@@ -25,6 +25,8 @@ import { ReportComponent } from './posts/reports/report-create/report-create.com
 import { ReportsListComponent } from './posts/reports/reports-list/reports-list.component';
 import { PostExetentionComponent } from './posts/post-exetention/post-exetention.component';
 import { GlobalErrorHandler } from './common/errors/global-error-handler';
+import { ContentCommentComponent } from './posts/post/content-comment/content-comment.component';
+
 
 @NgModule({
     declarations: [
@@ -41,6 +43,7 @@ import { GlobalErrorHandler } from './common/errors/global-error-handler';
         ReportComponent,
         ReportsListComponent,
         PostExetentionComponent,
+        ContentCommentComponent,
     ],
     imports: [
         BrowserModule,
@@ -62,6 +65,7 @@ import { GlobalErrorHandler } from './common/errors/global-error-handler';
     entryComponents: [
         AuthenticateComponent,
         ReportComponent,
+        ContentCommentComponent,
     ],
     bootstrap: [AppComponent]
 })

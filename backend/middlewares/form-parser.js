@@ -7,10 +7,10 @@ module.exports = function (req, res, next) {
             console.log("in form parser", err);
             res.status(500).json(err);
         } else {
+            reGroupDateFields(fields);
+
             req.body.files = files;
             req.body.fields = fields;
-
-            reGroupDateFields(fields);
             next();
         }
     });

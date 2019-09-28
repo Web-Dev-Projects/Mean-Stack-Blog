@@ -82,11 +82,20 @@ export class PostsService extends DataService {
     }
 
     viewPost(postId) {
-        return this.update(postId, {}, 'view/');
+        return this.update(postId, { sid: localStorage.getItem('sid') }, 'view/');
+    }
+
+    likePost(postId, like: boolean) {
+        return this.update(postId, { sid: localStorage.getItem('sid'), like: like }, 'like/');
     }
 
     commentOnPost(postId) {
         return this.update(postId, {}, 'comment/');
+    }
+
+    commentOnPostContent(postId, contentSegment, name, comment) {
+        return this.update(postId, { contentSegment: contentSegment, name: name, comment: comment }, 'content/');
+
     }
 
     reportPost(post: IPost, report: IReport) {
@@ -104,6 +113,9 @@ export class PostsService extends DataService {
             });
     }
 
+    getPostContent(postId) {
+        return this.get(postId, 'content/', { accessToken: this.adminService.accessToken });
+    };
 
     private modifyPostsContentFileSrc(posts: IPost[]) {
         posts.forEach((post) => {

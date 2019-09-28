@@ -22,6 +22,10 @@ export class PostExetentionComponent {
         return this._canShowShareOpts;
     }
 
+    get likeState() {
+        return this.post.likers.find(e => e === localStorage.getItem('sid').toString())
+    }
+
     toggleSharingOpts() {
         this._canShowShareOpts = !(this._canShowShareOpts);
     }
@@ -41,5 +45,20 @@ export class PostExetentionComponent {
 
     getUrl() {
         return 'https://localhost.com/posts/' + this.post._id;
+    }
+
+    changeLikeState() {
+
+        if (this.likeState) {
+            this.postsService.likePost(this.post._id, false)
+                .subscribe((likers) => {
+                    this.post.likers = likers;
+                })
+        } else {
+            this.postsService.likePost(this.post._id, true)
+                .subscribe((likers) => {
+                    this.post.likers = likers;
+                })
+        }
     }
 }

@@ -1,0 +1,28 @@
+<h1 mat-dialog-title>Please give your comment</h1>
+<div mat-dialog-content>
+    <form [formGroup]="form">
+        <div class="control-group">
+            <div class="form-group floating-label-form-group controls">
+                <label>Name</label>
+                <input type="text" class="form-control" formControlName="name" placeholder="name" required
+                    minlength="3">
+            </div>
+            <p class="help-block text-danger" *ngFor="let errMsg of getErrorsMsgs(name,'reporter name')">
+                {{errMsg}}</p>
+        </div>
+
+        <div class="control-group">
+            <div class="form-group floating-label-form-group controls">
+                <label>comment</label>
+                <textarea rows="5" class="form-control" formControlName="comment" placeholder="comment" required
+                    minlength="3"></textarea>
+            </div>
+            <p class="help-block text-danger" *ngFor="let errMsg of getErrorsMsgs(comment,'reporter comment')">
+                {{errMsg}}</p>
+        </div>
+    </form>
+</div>
+<div mat-dialog-actions>
+    <button mat-button (click)="onNoClick()">No Thanks</button>
+    <button mat-button (click)="onComment()">Send Comment</button>
+</div>
