@@ -1,10 +1,11 @@
-import { Component, OnInit, EventEmitter, HostListener } from '@angular/core';
+import { Component, OnInit, HostListener, OnDestroy } from '@angular/core';
 import { IPost, makePost } from '../post';
 import { PostsService } from '../posts.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { ContentCommentComponent } from './content-comment/content-comment.component';
 import { AdminService } from 'src/app/authenticate/admin.service';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-post',
@@ -12,10 +13,12 @@ import { AdminService } from 'src/app/authenticate/admin.service';
     styleUrls: ['./post.component.css'],
     host: { 'click': "onContetnComment" }
 })
-export class PostComponent implements OnInit {
+export class PostComponent implements OnInit, OnDestroy {
+
     private postId;
-    postContent = '';
+    private postSub: Subscription;
     post: IPost = makePost();
+    postContent = '';
     pageId = '/posts/';
 
     constructor(private postsService: PostsService,
@@ -25,35 +28,25 @@ export class PostComponent implements OnInit {
         private adminService: AdminService) {
         this.postId = this.activateRoute.snapshot.params.id;
         this.pageId += this.postId;
+    }
+
+    ngOnInit() {
+        this.postsService.viewPost(this.postId);
+        this.postSub = this.postsService.getPost(this.postId)
+            .subscribe((post: IPost) => {
+                this.post = post;
+            }, (error) => {
+                this.router.navigate(['error'], { queryParams: { errCode: error.getErrorData().status } });
+            });
+
         this.postsService.getPostContent(this.postId)
             .subscribe((postContent: any) => {
                 this.postContent = postContent.content;
             })
     }
 
-    ngOnInit() {
-        this.postsService.getPost(this.postId)
-            .subscribe((post: IPost) => {
-                this.post = post;
-                this.postsService.viewPost(this.postId)
-                    .subscribe((viewsNum) => {
-                        this.post.viewsNum = viewsNum;
-                    }, (error) => {
-                        this.post = makePost();
-                        this.router.navigate(['error'], { queryParams: { errCode: error.getErrorData().status } });
-                    })
-            }, (error) => {
-                this.router.navigate(['error'], { queryParams: { errCode: error.getErrorData().status } });
-            });
-    }
-
     onComment() {
-        this.post.commentsNum++;
-        this.postsService.commentOnPost(this.postId)
-            .subscribe(() => {
-            }, () => {
-                this.post.commentsNum--;
-            });
+        this.postsService.commentOnPost(this.postId);
     }
 
     @HostListener('click', ['$event.target']) onContentComment(target: HTMLElement) {
@@ -76,4 +69,9 @@ export class PostComponent implements OnInit {
 
         }
     }
+
+    ngOnDestroy(): void {
+        this.postSub.unsubscribe();
+    }
+
 }

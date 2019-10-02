@@ -2,8 +2,23 @@ const express = require('express');
 const UserModel = require('../models/user');
 const db = require('../db');
 const jwt = require('jsonwebtoken');
+const checkSession = require('../middlewares/check-session')
 
 const usersRouter = express.Router();
+
+usersRouter.post('/signin', [checkSession], (req, res) => {
+    db.findOne(UserModel, { username: req.body.username, password: req.body.password })
+        .then((user) => {
+            if (user) {
+                res.status(200).json({ accessToken: jwt.sign({ username: user.username, password: user.password }, 'shehab') });
+            } else {
+                res.status(401).json({ msg: "username or/and password is wrong." })
+            }
+        })
+        .catch((err) => {
+            res.status(500).json(err);
+        })
+});
 
 // usersRouter.post('/signup', (req, res) => {
 //     db.findOne(UserModel, { username: req.body.username })
@@ -22,27 +37,5 @@ const usersRouter = express.Router();
 //             res.status(500).json(err);
 //         })
 // });
-
-usersRouter.post('/signin', (req, res) => {
-    db.findOne(UserModel, { username: req.body.username, password: req.body.password })
-        .then((user) => {
-            if (user) {
-                res.status(200).json({ accessToken: jwt.sign({ username: user.username, password: user.password }, 'shehab') });
-            } else {
-                res.status(401).json({ msg: "username or/and password is wrong." })
-            }
-        })
-        .catch((err) => {
-            res.status(500).json(err);
-        })
-});
-
-
-// usersRouter.get(':username', (req, res) => {
-//     db.findOne(UserModel, { username: req.params.username })
-//         .then(data => res.status(200).json(data))
-//         .catch((err) => { res.status(500).json(err) })
-// });
-
 
 module.exports = usersRouter

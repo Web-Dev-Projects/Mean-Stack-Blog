@@ -3,9 +3,12 @@
         <i class="fa fa-eye icon"> {{post.viewsNum}}</i>
         <i class="fa fa-thumbs-up icon"> {{post.likers.length}}</i>
         <i class="fa fa-comment icon"> {{post.commentsNum}}</i>
-        <i class="fa fa-exclamation-triangle" style="cursor: pointer" (click)="openReports()" title="show reports"
-            *ngIf="adminService.isSignedIn">
+        <i class="fa fa-exclamation-triangle icon" style="cursor: pointer" (click)="openReports()"
+            title="canShowSharingOpts?'hide reports':'show reports'" *ngIf="adminService.isSignedIn">
             {{post.reports.length}}</i>
+
+        <i class="fa fa-qrcode icon" style="cursor: pointer" (click)="toggleQR()" title="canShowQR?'hide QR':'show QR'">
+            QR</i>
     </div>
 
     <div class="d-flex justify-content-end">
@@ -25,7 +28,14 @@
     <hr>
     <div class="d-flex justify-content-center">
         <share-buttons [theme]="'modern-dark'" [include]="['facebook','twitter','whatsapp']" [show]="3"
-            [showText]="true" [url]="getUrl()" [autoSetMeta]="false">
+            [showText]="true" [url]="url" [autoSetMeta]="false">
         </share-buttons>
+    </div>
+</div>
+
+<div id="sharing-options" *ngIf="canShowQR">
+    <hr>
+    <div class="d-flex justify-content-center">
+        <ngx-qrcode qrc-element-type="url" [qrc-value]="url"></ngx-qrcode>
     </div>
 </div>

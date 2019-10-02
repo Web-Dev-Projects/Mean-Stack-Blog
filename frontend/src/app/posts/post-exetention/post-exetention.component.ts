@@ -15,19 +15,23 @@ export class PostExetentionComponent {
 
     @Input('post') post: IPost = makePost();
     private _canShowShareOpts = false;
+    private _canShowQR = false;
 
     constructor(private reportDialog: MatDialog, private router: Router, public adminService: AdminService, private postsService: PostsService) { }
 
-    get canShowSharingOpts() {
-        return this._canShowShareOpts;
-    }
-
-    get likeState() {
-        return this.post.likers.find(e => e === localStorage.getItem('sid').toString())
-    }
+    get canShowSharingOpts() { return this._canShowShareOpts; }
+    get canShowQR() { return this._canShowQR; }
+    get likeState() { return this.post.likers.find(e => e === localStorage.getItem('sid').toString()) }
+    get url() { return 'https://localhost:4200/posts/' + this.post._id; }
 
     toggleSharingOpts() {
         this._canShowShareOpts = !(this._canShowShareOpts);
+        if (this._canShowShareOpts) this._canShowQR = false;
+    }
+
+    toggleQR() {
+        this._canShowQR = !(this._canShowQR);
+        if (this._canShowQR) this._canShowShareOpts = false;
     }
 
     openReports() {
@@ -43,22 +47,13 @@ export class PostExetentionComponent {
         });
     }
 
-    getUrl() {
-        return 'https://localhost.com/posts/' + this.post._id;
-    }
 
     changeLikeState() {
 
         if (this.likeState) {
-            this.postsService.likePost(this.post._id, false)
-                .subscribe((likers) => {
-                    this.post.likers = likers;
-                })
+            this.postsService.likePost(this.post._id, false);
         } else {
-            this.postsService.likePost(this.post._id, true)
-                .subscribe((likers) => {
-                    this.post.likers = likers;
-                })
+            this.postsService.likePost(this.post._id, true);
         }
     }
 }

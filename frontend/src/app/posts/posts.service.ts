@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { IPost, makePost } from './post';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, BehaviorSubject } from 'rxjs';
 import { DataService } from '../common/data.service';
 import { map } from 'rxjs/operators';
 import { AdminService } from '../authenticate/admin.service';
@@ -12,12 +12,37 @@ import { IReport } from './reports/report';
 })
 export class PostsService extends DataService {
 
-    private posts: IPost[] = [];
-    private selectedPost: IPost = makePost();
+    private _posts: IPost[] = [];
+    private _posts$ = new BehaviorSubject<IPost[]>(this._posts);
+
+    private _post: IPost = makePost();
+    private _post$ = new BehaviorSubject<IPost>(this._post);
 
     constructor(http: HttpClient, private adminService: AdminService) {
         super(http, "http://localhost:5000/api/posts/");
+        this.getAll().subscribe((posts: IPost[]) => {
+            this.modifyPostsContentFileSrc(posts);
+            this._posts = posts;
+            this._posts$.next([...this._posts]);
+        });
     }
+
+    get posts(): Observable<IPost[]> { return this._posts$.asObservable() };
+
+    getPost(postId): Observable<IPost> {
+        if (this.selectPost(postId)) {
+            this._post$.next(Object.assign({}, this._post));
+        } else {
+            this.get(postId)
+                .subscribe((post: IPost) => {
+                    this.modifyPostsContentFileSrc([post])
+                    this._post = post;
+                    this._post$.next(Object.assign({}, this._post));
+                });
+        }
+
+        return this._post$.asObservable();
+    };
 
     createPost(title: string, subtitle: string, contentFile: File) {
         let curdt = new Date();
@@ -29,68 +54,60 @@ export class PostsService extends DataService {
 
         let newPostData: FormData = new FormData();
 
-        newPostData.append('owner', this.adminService.username);
         newPostData.append('title', title);
         newPostData.append('subtitle', subtitle);
         newPostData.append('contentFile', contentFile);
+        newPostData.append('owner', this.adminService.username);
         newPostData.append('monthName', currDate.monthName);
         newPostData.append('day', currDate.day);
         newPostData.append('year', currDate.year);
 
+
+
         return this.create(newPostData, '', { accessToken: this.adminService.accessToken })
-            .pipe(map((post: IPost) => {
+            .pipe(map(((post: IPost) => {
                 this.modifyPostsContentFileSrc([post])
-                this.posts.push(post);
-            }));
+                this._posts.push(post);
+                let newPosts = [...this._posts];
+                this._posts$.next(newPosts);
+                return newPosts;
+            })));
     }
 
-
-    getPosts() {
-        return new Observable(
-            (subscriber) => {
-                subscriber.next(this.posts)
-                this.getAll().subscribe(
-                    (posts: IPost[]) => {
-                        this.modifyPostsContentFileSrc(posts);
-                        this.posts = posts;
-                        subscriber.next([...posts]);
-                        subscriber.complete();
-                    });
-            });
-    }
-
-    getPost(postId) {
-        if (this.posts.length) {
-            let posts = this.posts.filter(post => post._id === postId);
-            if (posts.length)
-                this.selectedPost = posts[0];
-        }
-
-        if (this.selectedPost._id === postId) {
-            return new Observable((subscriber) => {
-                subscriber.next(Object.assign({}, this.selectedPost));
-                subscriber.complete();
-            })
-        } else {
-            return this.get(postId)
-                .pipe(map((post: IPost) => {
-                    this.modifyPostsContentFileSrc([post])
-                    this.selectedPost = post;
-                    return Object.assign({}, this.selectedPost);
-                }));
-        }
-    }
 
     viewPost(postId) {
-        return this.update(postId, { sid: localStorage.getItem('sid') }, 'view/');
+        this.selectPost(postId);
+        this.update(postId, { sid: localStorage.getItem('sid') }, 'view/')
+            .subscribe((viewsNum: number) => {
+                this._post.viewsNum = viewsNum;
+                this._post$.next(Object.assign({}, this._post));
+                this._posts$.next([...this._posts]);
+            })
     }
 
     likePost(postId, like: boolean) {
-        return this.update(postId, { sid: localStorage.getItem('sid'), like: like }, 'like/');
+        this.selectPost(postId);
+
+        this.update(postId, { sid: localStorage.getItem('sid'), like: like }, 'like/')
+            .subscribe((likers: []) => {
+                this._post.likers = likers;
+                this._post$.next(Object.assign({}, this._post));
+                this._posts$.next([...this._posts]);
+            });
     }
 
     commentOnPost(postId) {
-        return this.update(postId, {}, 'comment/');
+        this.selectPost(postId);
+
+        this._post.commentsNum++;
+        this._post$.next(Object.assign({}, this._post));
+        return this.update(postId, {}, 'comment/')
+            .subscribe(() => {
+                this._post$.next(Object.assign({}, this._post));
+            }, () => {
+                this._post.commentsNum--;
+                this._post$.next(Object.assign({}, this._post));
+            })
     }
 
     commentOnPostContent(postId, contentSegment, name, comment) {
@@ -105,7 +122,7 @@ export class PostsService extends DataService {
     getPostReports(postId) {
         return new Observable(
             (subscriber) => {
-                this.getPost(postId).subscribe(
+                this.get(postId).subscribe(
                     (post: IPost) => {
                         subscriber.next([...post.reports])
                         subscriber.complete();
@@ -116,6 +133,16 @@ export class PostsService extends DataService {
     getPostContent(postId) {
         return this.get(postId, 'content/', { accessToken: this.adminService.accessToken });
     };
+
+
+    private selectPost(postId) {
+        let post = this._posts.find(post => post._id === postId);
+        if (post) {
+            this._post = post;
+            return true
+        }
+        return false;
+    }
 
     private modifyPostsContentFileSrc(posts: IPost[]) {
         posts.forEach((post) => {

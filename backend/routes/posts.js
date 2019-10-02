@@ -3,16 +3,22 @@ const authenticate = require('../middlewares/authenticate');
 const express = require('express')
 const formParser = require('../middlewares/form-parser')
 const fileSaver = require('../middlewares/file-saver')
+const checkSession = require('../middlewares/check-session')
 const tokenDecoder = require('../middlewares/access-token-decode')
 const db = require('../db')
 const path = require('path')
 const fs = require('fs')
+
 const postsRouter = express.Router();
 
-postsRouter.post('', [tokenDecoder, authenticate, formParser, fileSaver],
+postsRouter.post('', [checkSession, tokenDecoder, authenticate, formParser, fileSaver],
     (req, res) => {
         db.create(PostModel, req.body)
             .then((data) => {
+                data = data.toObject();
+                data.viewsNum = data.postUsers.viewers.length;
+                data.likers = data.postUsers.likers;
+                delete data.postUsers;
                 res.status(200).json(data);
             })
             .catch((err) => {
@@ -22,7 +28,7 @@ postsRouter.post('', [tokenDecoder, authenticate, formParser, fileSaver],
     }
 );
 
-postsRouter.get('', (req, res) => {
+postsRouter.get('', [checkSession], (req, res) => {
 
     db.find(PostModel, {})
         .then(data => {
@@ -35,7 +41,7 @@ postsRouter.get('', (req, res) => {
                 return doc;
             }))
 
-            res.status(200).json({ sid: req.headers.sid, data: data });
+            res.status(200).json(data);
         })
         .catch((err) => {
             console.log("in getting posts", err);
@@ -43,7 +49,7 @@ postsRouter.get('', (req, res) => {
         })
 });
 
-postsRouter.get('/:id', (req, res) => {
+postsRouter.get('/:id', [checkSession], (req, res) => {
     db.findOne(PostModel, { _id: req.params.id })
         .then(data => {
             data = data.toObject();
@@ -51,7 +57,7 @@ postsRouter.get('/:id', (req, res) => {
                 data.viewsNum = data.postUsers.viewers.length;
                 data.likers = data.postUsers.likers;
                 delete data.postUsers;
-                res.status(200).json({ sid: req.headers.sid, data: data })
+                res.status(200).json(data)
             } else {
                 res.status(404).json({ msg: "user id is wrong or invalid" });
             }
@@ -63,10 +69,10 @@ postsRouter.get('/:id', (req, res) => {
 });
 
 
-postsRouter.put('/view/:id', (req, res) => {
+postsRouter.put('/view/:id', [checkSession], (req, res) => {
     PostModel.findOneAndUpdate({ _id: req.params.id }, { $addToSet: { "postUsers.viewers": req.headers.sid } }, { useFindAndModify: false, new: true })
         .then((data) => {
-            res.status(200).json({ sid: req.headers.sid, data: data.postUsers.viewers.length });
+            res.status(200).json(data.postUsers.viewers.length);
         })
         .catch((err => {
             console.log("increase views num", err);
@@ -74,11 +80,11 @@ postsRouter.put('/view/:id', (req, res) => {
         }))
 });
 
-postsRouter.put('/like/:id', (req, res) => {
+postsRouter.put('/like/:id', [checkSession], (req, res) => {
     if (req.body.like === true) {
         PostModel.findOneAndUpdate({ _id: req.params.id }, { $addToSet: { "postUsers.likers": req.headers.sid } }, { useFindAndModify: false, new: true })
             .then((data) => {
-                res.status(200).json({ sid: req.headers.sid, data: data.postUsers.likers });
+                res.status(200).json(data.postUsers.likers);
             })
             .catch((err => {
                 console.log("in likers", err);
@@ -87,7 +93,7 @@ postsRouter.put('/like/:id', (req, res) => {
     } else {
         PostModel.findOneAndUpdate({ _id: req.params.id }, { $pull: { "postUsers.likers": req.headers.sid } }, { useFindAndModify: false, new: true })
             .then((data) => {
-                res.status(200).json({ sid: req.headers.sid, data: data.postUsers.likers });
+                res.status(200).json(data.postUsers.likers);
             })
             .catch((err => {
                 console.log("in likers", err);
@@ -96,10 +102,10 @@ postsRouter.put('/like/:id', (req, res) => {
     }
 });
 
-postsRouter.put('/comment/:id', (req, res) => {
+postsRouter.put('/comment/:id', [checkSession], (req, res) => {
     db.incFieldsWithValues(PostModel, req.params.id, ["commentsNum"], [1])
         .then(() => {
-            res.status(200).json({ sid: req.headers.sid, data: {} });
+            res.status(200).json({});
         })
         .catch((err => {
             console.log("increase comments num", err);
@@ -109,10 +115,10 @@ postsRouter.put('/comment/:id', (req, res) => {
 });
 
 
-postsRouter.put('/report/:id', (req, res) => {
+postsRouter.put('/report/:id', [checkSession], (req, res) => {
     db.addElemToList(PostModel, req.params.id, "reports", req.body)
         .then((post) => {
-            res.status(200).json({ sid: req.headers.sid, data: post });
+            res.status(200).json(post);
         })
         .catch((err => {
             console.log("in adding new report ", err);
@@ -121,7 +127,7 @@ postsRouter.put('/report/:id', (req, res) => {
 
 });
 
-postsRouter.put('/content/:id', [tokenDecoder], (req, res) => {
+postsRouter.put('/content/:id', [checkSession, tokenDecoder], (req, res) => {
     if (req.headers.decodedtoken) {
         res.status(500).json({ msg: "Admin is not allowd" });
     } else {
@@ -145,8 +151,7 @@ postsRouter.put('/content/:id', [tokenDecoder], (req, res) => {
     }
 })
 
-postsRouter.get('/content/:id', [tokenDecoder], (req, res) => {
-
+postsRouter.get('/content/:id', [checkSession, tokenDecoder], (req, res) => {
     db.findOne(PostModel, { '_id': req.params.id })
         .then(data => {
             let filePath = path.join(process.env.FILESPATH, data.contentFileSrc);

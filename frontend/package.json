@@ -40,6 +40,7 @@
     "ng-flash-messages": "^0.3.0",
     "ngx-disqus": "^2.4.3",
     "ngx-markdown": "^8.1.0",
+    "ngx-qrcode2": "0.0.9",
     "ngx-toastr": "^10.2.0",
     "popper.js": "^1.15.0",
     "prismjs": "^1.9.0",

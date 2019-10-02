@@ -11,6 +11,7 @@ import { ShareButtonsModule } from '@ngx-share/buttons';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { NgFlashMessagesModule } from 'ng-flash-messages';
 import { MarkdownModule } from 'ngx-markdown';
+import { NgxQRCodeModule } from 'ngx-qrcode2';
 
 import { AppComponent } from './app.component';
 import { NavbarComponent } from 'src/app/navbar/navbar.component';
@@ -55,6 +56,7 @@ import { ContentCommentComponent } from './posts/post/content-comment/content-co
         AngularFontAwesomeModule,
         HttpClientModule,
         ShareButtonsModule,
+        NgxQRCodeModule,
         NgFlashMessagesModule.forRoot(),
         DisqusModule.forRoot('schneider-task-2'),
         MarkdownModule.forRoot({ loader: HttpClient }),
