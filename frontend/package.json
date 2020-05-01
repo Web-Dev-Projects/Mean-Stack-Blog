@@ -36,7 +36,7 @@
     "font-awesome": "^4.7.0",
     "getmac": "^1.4.6",
     "hammerjs": "^2.0.8",
-    "jquery": "^1.9.1",
+    "jquery": "^3.5.0",
     "ng-flash-messages": "^0.3.0",
     "ngx-disqus": "^2.4.3",
     "ngx-markdown": "^8.1.0",
